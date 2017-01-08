@@ -146,7 +146,8 @@
 				TargetAttributes = {
 					1E3A35E81E22306B00F5C5C7 = {
 						CreatedOnToolsVersion = 8.2.1;
-						ProvisioningStyle = Automatic;
+						DevelopmentTeam = 26Q6TZDWAV;
+						ProvisioningStyle = Manual;
 					};
 					1E3A35FC1E22306B00F5C5C7 = {
 						CreatedOnToolsVersion = 8.2.1;
@@ -337,10 +338,14 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				DEVELOPMENT_TEAM = 26Q6TZDWAV;
 				INFOPLIST_FILE = WrappUpper/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.derpoliuk.WrappUpper;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "89fbfac9-60cd-469e-97dc-8dfa37b0a342";
+				PROVISIONING_PROFILE_SPECIFIER = "iOS Wildcard Profile";
 				SWIFT_VERSION = 3.0;
 			};
 			name = Debug;
@@ -349,10 +354,14 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				DEVELOPMENT_TEAM = 26Q6TZDWAV;
 				INFOPLIST_FILE = WrappUpper/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.derpoliuk.WrappUpper;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "89fbfac9-60cd-469e-97dc-8dfa37b0a342";
+				PROVISIONING_PROFILE_SPECIFIER = "iOS Wildcard Profile";
 				SWIFT_VERSION = 3.0;
 			};
 			name = Release;
@@ -404,6 +413,7 @@
 				1E3A36081E22306B00F5C5C7 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		1E3A36091E22306B00F5C5C7 /* Build configuration list for PBXNativeTarget "WrappUpperTests" */ = {
 			isa = XCConfigurationList;
@@ -412,6 +422,7 @@
 				1E3A360B1E22306B00F5C5C7 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
