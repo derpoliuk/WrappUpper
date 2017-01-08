@@ -8,8 +8,9 @@
 
 import UIKit
 import AVFoundation
+import CallKit
 
-final class InterruptableAudioEngine: AudioEngine {
+final class InterruptableAudioEngine: NSObject, AudioEngine {
 
     weak var delegate: AudioEngineDelegate?
 
@@ -17,11 +18,14 @@ final class InterruptableAudioEngine: AudioEngine {
         return recorder?.isRecording ?? false
     }
 
-    fileprivate var recorder: AudioRecorder?
+    fileprivate var recorder: IterruptableAudioRecorder?
     fileprivate var player: AVAudioPlayer?
+    fileprivate var callObserver = CXCallObserver()
 
-    init() {
+    override init() {
+        super.init()
         subsribeForNotifications()
+        observerPhoneCalls()
     }
 
     deinit {
@@ -43,15 +47,10 @@ final class InterruptableAudioEngine: AudioEngine {
     func record() {
         guard !isRecording else { return }
 
-
-
         let url = AudioEngineFileURLGenerator.generateAudioFileURL()
 
         let recorder: IterruptableAudioRecorder
         do {
-//            try AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryRecord)
-//            try AVAudioSession.sharedInstance().setActive(true)
-
             recorder = try IterruptableAudioRecorder(url: url, format: audioFormat)
         } catch {
             let message = "Failed init IterruptableAudioRecorder. Reason: \(error.localizedDescription)"
@@ -72,6 +71,61 @@ final class InterruptableAudioEngine: AudioEngine {
     
 }
 
+// MARK: - Recording methods
+
+private extension InterruptableAudioEngine {
+
+    func pauseRecording(interruption: AudioEngineInterruption) {
+        guard let recorder = recorder else { return }
+        recorder.pause(interruption: interruption)
+        delegate?.audioEngineDidPause(self)
+    }
+
+    func resumeRecording() {
+        guard let recorder = recorder else { return }
+        recorder.record()
+        delegate?.audioEngineDidResume(self)
+    }
+
+}
+
+// MARK: - Call Observer
+
+extension InterruptableAudioEngine: CXCallObserverDelegate {
+
+    func observerPhoneCalls() {
+        callObserver.setDelegate(self, queue: DispatchQueue.main)
+    }
+
+    /*
+     applicationDidBecomeActive
+     call.isOutgoing: false
+     call.isOnHold: false
+     call.hasConnected: false
+     call.hasEnded: false
+     applicationWillResignActive
+     call.isOutgoing: false
+     call.isOnHold: false
+     call.hasConnected: true
+     call.hasEnded: false
+     aplicationDidEnterBackground
+     applicationWillEnterForeground
+     call.isOutgoing: false
+     call.isOnHold: false
+     call.hasConnected: true
+     call.hasEnded: true
+     applicationDidBecomeActive
+     */
+    func callObserver(_ callObserver: CXCallObserver, callChanged call: CXCall) {
+        if !call.hasEnded {
+            pauseRecording(interruption: .call)
+        } else {
+            resumeRecording()
+        }
+    }
+
+}
+
 // MARK: - Notifications
 
 private extension InterruptableAudioEngine {
@@ -79,42 +133,25 @@ private extension InterruptableAudioEngine {
     func subsribeForNotifications() {
         let notificationCenter = NotificationCenter.default
         notificationCenter.addObserver(self, selector: #selector(audioSessionInterruption(_:)), name: Notification.Name.AVAudioSessionInterruption, object: AVAudioSession.sharedInstance())
-        notificationCenter.addObserver(self, selector: #selector(applicationWillResignActive(_:)), name: Notification.Name.UIApplicationWillResignActive, object: nil)
         notificationCenter.addObserver(self, selector: #selector(applicationDidBecomeActive(_:)), name: Notification.Name.UIApplicationDidBecomeActive, object: nil)
-        notificationCenter.addObserver(self, selector: #selector(applicationWillEnterForeground(_:)), name: Notification.Name.UIApplicationWillEnterForeground, object: nil)
         notificationCenter.addObserver(self, selector: #selector(aplicationDidEnterBackground(_:)), name: Notification.Name.UIApplicationDidEnterBackground, object: nil)
     }
 
     @objc func audioSessionInterruption(_ notification: Notification) {
-        guard let userInfo = notification.userInfo, let interruptionType = userInfo[AVAudioSessionInterruptionTypeKey] as? Int else { return }
-        print("interruptionType: \(interruptionType)")
-        //        if interruptionType == .began {
-        //
-        //        }
-        print(#function)
-    }
-
-    @objc func applicationWillEnterForeground(_ notification: Notification) {
-        print(#function)
+        guard let userInfo = notification.userInfo, let rawType = userInfo[AVAudioSessionInterruptionTypeKey] as? UInt, let interruptionType = AVAudioSessionInterruptionType(rawValue: rawType) else { return }
+        if interruptionType == .began {
+            pauseRecording(interruption: .default)
+        } else {
+            resumeRecording()
+        }
     }
 
     @objc func aplicationDidEnterBackground(_ notification: Notification) {
-        print(#function)
-    }
-
-    @objc func applicationWillResignActive(_ notification: Notification) {
-        print(#function)
+        pauseRecording(interruption: .default)
     }
 
     @objc func applicationDidBecomeActive(_ notification: Notification) {
-        print(#function)
-        do {
-            try AVAudioSession.sharedInstance().setActive(true)
-//            recorder?.record()
-        } catch {
-            let message = "Failed activate AVAudioSession. Reason: \(error.localizedDescription)"
-            fatalError(message)
-        }
+        resumeRecording()
     }
 
 }

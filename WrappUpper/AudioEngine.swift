@@ -23,7 +23,7 @@ protocol AudioEngine {
 }
 
 enum AudioEngineInterruption {
-    case Call, `default`
+    case call, `default`
 }
 
 protocol AudioRecorder {
