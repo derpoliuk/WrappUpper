@@ -26,17 +26,14 @@ final class IterruptableAudioRecorder: AudioRecorder {
     }
 
     func record() {
-        print("record")
         recorder.record()
     }
 
     func stop() {
-        print("stop")
         recorder.stop()
     }
 
     func pause(interruption: AudioEngineInterruption) {
-        print("pause")
         recorder.pause()
     }
 }
