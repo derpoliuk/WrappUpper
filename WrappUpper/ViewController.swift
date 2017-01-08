@@ -10,16 +10,13 @@ import UIKit
 
 class ViewController: UIViewController {
 
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
-    }
+    private var recording = false
 
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
+    @IBAction func recordButtonPressed(_ sender: UIButton) {
+        recording = !recording
+        let title = recording ? "Stop" : "Record"
+        sender.setTitle(title, for: .normal)
     }
-
 
 }
 
