@@ -52,14 +52,17 @@ class ViewController: UIViewController {
 extension ViewController: AudioEngineDelegate {
 
     func audioEngineDidPause(_ audioEngine: AudioEngine) {
+        statusLabel.text = "Recording paused"
         recordButton.setTitle("Resume", for: .normal)
     }
 
     func audioEngineDidResume(_ audioEngine: AudioEngine) {
+        statusLabel.text = "Recording resumed"
         recordButton.setTitle("Stop", for: .normal)
     }
 
     func audioEngineDidStop(_ audioEngine: AudioEngine) {
+        statusLabel.text = "Recording stopped"
         recordButton.setTitle("Record", for: .normal)
     }
     
