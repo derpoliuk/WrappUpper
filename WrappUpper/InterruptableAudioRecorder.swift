@@ -21,14 +21,32 @@ final class InterruptableAudioRecorder: NSObject, AudioRecorder {
         self.url = url
     }
 
-    func record() throws {
+    var isReady = false
+
+    func prepare() throws {
         try setupCaptureSession()
         try setupWriterInput()
+        isReady = true
+    }
+
+    func record() throws {
+        guard !isRecording else {
+            return
+        }
+
+        if !isReady {
+            try prepare()
+        }
+
         isRecording = true
         captureSession.startRunning()
     }
 
     func stop() throws {
+        guard isRecording else {
+            return
+        }
+        isRecording = false
         captureSession.stopRunning()
         assetWriter.finishWriting {
             print("finished writing")
@@ -37,12 +55,22 @@ final class InterruptableAudioRecorder: NSObject, AudioRecorder {
 
     func pause(interruption: AudioEngineInterruption) {
         print("InterruptableAudioRecorder.pause")
+//        if interruption != .call {
+//            try? stop()
+//        }
+//
+//        guard isRecording else {
+//            return
+//        }
+//        isRecording = false
+//        captureSession.stopRunning()
+//        if interruption == .call {
+//            keepAddingSilence()
+//        }
+    }
 
-        captureSession.stopRunning()
+    func keepAddingSilence() {
 
-        if interruption == .call {
-
-        }
     }
 
     var captureSession: AVCaptureSession!
@@ -108,10 +136,13 @@ final class InterruptableAudioRecorder: NSObject, AudioRecorder {
 extension InterruptableAudioRecorder: AVCaptureAudioDataOutputSampleBufferDelegate {
 
     func captureOutput(_ captureOutput: AVCaptureOutput!, didOutputSampleBuffer sampleBuffer: CMSampleBuffer!, from connection: AVCaptureConnection!) {
+        print(#function)
         if !CMSampleBufferDataIsReady(sampleBuffer) {
             print("Sample buffer is not ready. Skipping.")
         }
-        guard isRecording else { return }
+        guard isRecording, writerInput.isReadyForMoreMediaData else {
+            return
+        }
 
         let lastSampleTime = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
 
