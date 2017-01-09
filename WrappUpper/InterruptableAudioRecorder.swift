@@ -14,9 +14,7 @@ extension String: Error {}
 final class InterruptableAudioRecorder: NSObject, AudioRecorder {
 
     let url: URL
-    var isRecording: Bool {
-        return recorder?.isRecording ?? false
-    }
+    var isRecording: Bool = false
 
     fileprivate var recorder: AVAudioRecorder?
     fileprivate var tempFileURLs = [URL]()
@@ -29,11 +27,20 @@ final class InterruptableAudioRecorder: NSObject, AudioRecorder {
     }
 
     func record() throws {
-        try recordToTempFile()
+//        try recordToTempFile()
+
+        try setupCaptureSession()
+        try setupWriterInput()
+        isRecording = true
+        captureSession.startRunning()
     }
 
     func stop() throws {
-        try stopRecording()
+        captureSession.stopRunning()
+        assetWriter.finishWriting {
+            print("finished writing")
+        }
+//        try stopRecording()
     }
 
     func pause(interruption: AudioEngineInterruption) {
@@ -50,10 +57,41 @@ final class InterruptableAudioRecorder: NSObject, AudioRecorder {
     var assetWriter: AVAssetWriter!
 
     func setupWriterInput() throws {
-        let settings = [AVFormatIDKey: kAudioFormatLinearPCM,
-                        AVEncoderBitDepthHintKey: 16,
-                        AVSampleRateKey: 16000,
-                        AVNumberOfChannelsKey: 2]
+
+/*
+         AudioChannelLayout channelLayout;
+         memset(&channelLayout, 0, sizeof(AudioChannelLayout));
+         channelLayout.mChannelLayoutTag = kAudioChannelLayoutTag_Stereo;
+         NSDictionary *outputSettings = [NSDictionary dictionaryWithObjectsAndKeys:
+         [NSNumber numberWithInt:kAudioFormatLinearPCM], AVFormatIDKey,
+         [NSNumber numberWithFloat:44100.0], AVSampleRateKey,
+         [NSNumber numberWithInt:2], AVNumberOfChannelsKey,
+         [NSData dataWithBytes:&channelLayout length:sizeof(AudioChannelLayout)], AVChannelLayoutKey,
+         [NSNumber numberWithInt:16], AVLinearPCMBitDepthKey,
+         [NSNumber numberWithBool:NO], AVLinearPCMIsNonInterleaved,
+         [NSNumber numberWithBool:NO],AVLinearPCMIsFloatKey,
+         [NSNumber numberWithBool:NO], AVLinearPCMIsBigEndianKey,
+         nil];
+         AVAssetWriterInput *assetWriterInput = [AVAssetWriterInput assetWriterInputWithMediaType:AVMediaTypeAudio
+         outputSettings:outputSettings];
+ */
+
+        var channelLayout = AudioChannelLayout()
+        let size = MemoryLayout<AudioChannelLayout>.size
+        memset(&channelLayout, 0, size)
+        channelLayout.mChannelLayoutTag = kAudioChannelLayoutTag_Stereo
+        let channelLayoutData = NSData(bytes: &channelLayout, length: size)
+
+        let settings: [String: Any] = [
+            AVFormatIDKey: kAudioFormatLinearPCM,
+            AVSampleRateKey: 16000,
+            AVLinearPCMIsBigEndianKey: false,
+            AVLinearPCMIsFloatKey: false,
+            AVLinearPCMBitDepthKey: 16,
+            AVLinearPCMIsNonInterleaved: false,
+            AVNumberOfChannelsKey: 2,
+            AVChannelLayoutKey: channelLayoutData
+        ]
 
         let writerInput = AVAssetWriterInput(mediaType: AVMediaTypeAudio, outputSettings: settings)
         writerInput.expectsMediaDataInRealTime = true
@@ -64,6 +102,7 @@ final class InterruptableAudioRecorder: NSObject, AudioRecorder {
         }
         assetWriter.add(writerInput)
         self.writerInput = writerInput
+        self.assetWriter = assetWriter
     }
 
     func setupCaptureSession() throws {
@@ -87,8 +126,6 @@ final class InterruptableAudioRecorder: NSObject, AudioRecorder {
 
         self.dataOutput = dataOutput
         self.captureSession = captureSession
-        captureSession.startRunning()
-        captureSession.stopRunning()
     }
 
 }
@@ -96,7 +133,23 @@ final class InterruptableAudioRecorder: NSObject, AudioRecorder {
 extension InterruptableAudioRecorder: AVCaptureAudioDataOutputSampleBufferDelegate {
 
     func captureOutput(_ captureOutput: AVCaptureOutput!, didOutputSampleBuffer sampleBuffer: CMSampleBuffer!, from connection: AVCaptureConnection!) {
+        if !CMSampleBufferDataIsReady(sampleBuffer) {
+            print("Sample buffer is not ready. Skipping.")
+        }
+        guard isRecording else { return }
 
+        let lastSampleTime = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
+
+        if assetWriter.status != .writing {
+            if !assetWriter.startWriting() {
+                print("asset writer can not start writing")
+            }
+            assetWriter.startSession(atSourceTime: lastSampleTime)
+        }
+
+        if !writerInput.append(sampleBuffer) {
+            print("failed append sample buffer")
+        }
     }
 
 }
