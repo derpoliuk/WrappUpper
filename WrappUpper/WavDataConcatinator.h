@@ -11,5 +11,6 @@
 @interface WavDataConcatinator : NSObject
 
 + (NSData *)concatWavData:(NSData *)data1 withWavData:(NSData *)data2;
++ (NSData *)appendSilenceWithDuration:(NSTimeInterval)duration toWavData:(NSData *)data;
 
 @end

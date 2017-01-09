@@ -15,6 +15,8 @@
 + (NSData *)concatWavData:(NSData *)data1 withWavData:(NSData *)data2 {
     NSLog(@"%s", __PRETTY_FUNCTION__);
     if ([data1 length] > 0 && [data2 length] > 0) {
+
+        // TODO: Inject settings or use settings from header
         long totalAudioLen = 0;
         long totalDataLen = 0;
         long longSampleRate = 16000;
@@ -103,6 +105,11 @@
     } else {
         return nil;
     }
+}
+
++ (NSData *)appendSilenceWithDuration:(NSTimeInterval)duration toWavData:(NSData *)data {
+    NSLog(@"%s", __PRETTY_FUNCTION__);
+    return data;
 }
 
 @end
