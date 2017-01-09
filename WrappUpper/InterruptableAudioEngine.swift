@@ -76,6 +76,7 @@ final class InterruptableAudioEngine: NSObject, AudioEngine {
             let message = "Failed init stop recorder. Reason: \(error.localizedDescription)"
             fatalError(message)
         }
+        recorder = nil
     }
 
     private var audioFormat: AVAudioFormat {
