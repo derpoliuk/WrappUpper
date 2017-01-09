@@ -14,11 +14,9 @@ final class InterruptableAudioEngine: NSObject, AudioEngine {
 
     weak var delegate: AudioEngineDelegate?
 
-    var isRecording: Bool {
-        return recorder?.isRecording ?? false
-    }
+    var isRecording = false
 
-    fileprivate var recorder: IterruptableAudioRecorder?
+    fileprivate var recorder: InterruptableAudioRecorder?
     fileprivate var player: AVAudioPlayer?
     fileprivate var callObserver = CXCallObserver()
 
@@ -47,22 +45,38 @@ final class InterruptableAudioEngine: NSObject, AudioEngine {
     func record() {
         guard !isRecording else { return }
 
-        let url = AudioEngineFileURLGenerator.generateAudioFileURL()
+        isRecording = true
 
-        let recorder: IterruptableAudioRecorder
+
+        let recorder: InterruptableAudioRecorder
+        if let e = self.recorder {
+            recorder = e
+        } else {
+            let url = AudioEngineFileURLGenerator.generateAudioFileURL()
+            recorder = InterruptableAudioRecorder(url: url, format: audioFormat)
+        }
+
         do {
-            recorder = try IterruptableAudioRecorder(url: url, format: audioFormat)
+            try recorder.record()
         } catch {
-            let message = "Failed init IterruptableAudioRecorder. Reason: \(error.localizedDescription)"
+            let message = "Failed init start recorder. Reason: \(error.localizedDescription)"
             fatalError(message)
         }
-        recorder.record()
         self.recorder = recorder
     }
 
     func stop() {
         guard isRecording else { return }
-        recorder?.stop()
+
+        isRecording = false
+
+        do {
+            try recorder?.stop()
+        } catch {
+            let message = "Failed init stop recorder. Reason: \(error.localizedDescription)"
+            fatalError(message)
+        }
+        recorder = nil
     }
 
     private var audioFormat: AVAudioFormat {
@@ -75,6 +89,7 @@ final class InterruptableAudioEngine: NSObject, AudioEngine {
 
 private extension InterruptableAudioEngine {
 
+    //TODO: remove force try
     func pauseRecording(interruption: AudioEngineInterruption) {
         guard let recorder = recorder else { return }
         recorder.pause(interruption: interruption)
@@ -83,7 +98,7 @@ private extension InterruptableAudioEngine {
 
     func resumeRecording() {
         guard let recorder = recorder else { return }
-        recorder.record()
+        try! recorder.record()
         delegate?.audioEngineDidResume(self)
     }
 

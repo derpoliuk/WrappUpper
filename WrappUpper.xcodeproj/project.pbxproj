@@ -15,7 +15,7 @@
 		1E3A36021E22306B00F5C5C7 /* WrappUpperTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E3A36011E22306B00F5C5C7 /* WrappUpperTests.swift */; };
 		1E3BAEBC1E2253B400589F4A /* AudioEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E3BAEBB1E2253B400589F4A /* AudioEngine.swift */; };
 		1E3BAEBE1E22758E00589F4A /* InterruptableAudioEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E3BAEBD1E22758E00589F4A /* InterruptableAudioEngine.swift */; };
-		1E3BAEC01E2275AB00589F4A /* IterruptableAudioRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E3BAEBF1E2275AB00589F4A /* IterruptableAudioRecorder.swift */; };
+		1E3BAEC01E2275AB00589F4A /* InterruptableAudioRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E3BAEBF1E2275AB00589F4A /* InterruptableAudioRecorder.swift */; };
 		1E3BAEC21E2275C500589F4A /* AudioEngineFileURLGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E3BAEC11E2275C500589F4A /* AudioEngineFileURLGenerator.swift */; };
 /* End PBXBuildFile section */
 
@@ -42,7 +42,7 @@
 		1E3A36031E22306B00F5C5C7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1E3BAEBB1E2253B400589F4A /* AudioEngine.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AudioEngine.swift; sourceTree = "<group>"; };
 		1E3BAEBD1E22758E00589F4A /* InterruptableAudioEngine.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InterruptableAudioEngine.swift; sourceTree = "<group>"; };
-		1E3BAEBF1E2275AB00589F4A /* IterruptableAudioRecorder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IterruptableAudioRecorder.swift; sourceTree = "<group>"; };
+		1E3BAEBF1E2275AB00589F4A /* InterruptableAudioRecorder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InterruptableAudioRecorder.swift; sourceTree = "<group>"; };
 		1E3BAEC11E2275C500589F4A /* AudioEngineFileURLGenerator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AudioEngineFileURLGenerator.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -89,7 +89,7 @@
 				1E3A35EE1E22306B00F5C5C7 /* ViewController.swift */,
 				1E3BAEBB1E2253B400589F4A /* AudioEngine.swift */,
 				1E3BAEBD1E22758E00589F4A /* InterruptableAudioEngine.swift */,
-				1E3BAEBF1E2275AB00589F4A /* IterruptableAudioRecorder.swift */,
+				1E3BAEBF1E2275AB00589F4A /* InterruptableAudioRecorder.swift */,
 				1E3BAEC11E2275C500589F4A /* AudioEngineFileURLGenerator.swift */,
 				1E3A35F01E22306B00F5C5C7 /* Main.storyboard */,
 				1E3A35F31E22306B00F5C5C7 /* Assets.xcassets */,
@@ -217,7 +217,7 @@
 				1E3BAEC21E2275C500589F4A /* AudioEngineFileURLGenerator.swift in Sources */,
 				1E3BAEBE1E22758E00589F4A /* InterruptableAudioEngine.swift in Sources */,
 				1E3A35ED1E22306B00F5C5C7 /* AppDelegate.swift in Sources */,
-				1E3BAEC01E2275AB00589F4A /* IterruptableAudioRecorder.swift in Sources */,
+				1E3BAEC01E2275AB00589F4A /* InterruptableAudioRecorder.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
