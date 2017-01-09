@@ -31,7 +31,9 @@ final class InterruptableAudioEngine: NSObject, AudioEngine {
     }
 
     func playLast() {
-        guard let fileURL = recorder?.url, !isRecording else { return }
+        guard let fileURL = recorder?.url, !isRecording else {
+            return
+        }
         do {
             let player = try AVAudioPlayer(contentsOf: fileURL)
             player.play()
@@ -76,7 +78,6 @@ final class InterruptableAudioEngine: NSObject, AudioEngine {
             let message = "Failed init stop recorder. Reason: \(error.localizedDescription)"
             fatalError(message)
         }
-        recorder = nil
     }
 
     private var audioFormat: AVAudioFormat {
