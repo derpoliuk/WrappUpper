@@ -66,8 +66,8 @@ final class InterruptableAudioEngine: NSObject, AudioEngine {
 
 
         let recorder: InterruptableAudioRecorder
-        if let e = self.recorder {
-            recorder = e
+        if let previousRecorder = self.recorder {
+            recorder = previousRecorder
         } else {
             let url = AudioEngineFileURLGenerator.generateAudioFileURL()
             recorder = InterruptableAudioRecorder(url: url, format: audioFormat)
