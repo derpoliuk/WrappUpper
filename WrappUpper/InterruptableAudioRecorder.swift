@@ -9,7 +9,9 @@
 import Foundation
 import AVFoundation
 
-final class InterruptableAudioRecorder: AudioRecorder {
+extension String: Error {}
+
+final class InterruptableAudioRecorder: NSObject, AudioRecorder {
 
     let url: URL
     var isRecording: Bool {
@@ -42,6 +44,61 @@ final class InterruptableAudioRecorder: AudioRecorder {
         }
     }
 
+    var captureSession: AVCaptureSession!
+    var dataOutput: AVCaptureAudioDataOutput!
+    var writerInput: AVAssetWriterInput!
+    var assetWriter: AVAssetWriter!
+
+    func setupWriterInput() throws {
+        let settings = [AVFormatIDKey: kAudioFormatLinearPCM,
+                        AVEncoderBitDepthHintKey: 16,
+                        AVSampleRateKey: 16000,
+                        AVNumberOfChannelsKey: 2]
+
+        let writerInput = AVAssetWriterInput(mediaType: AVMediaTypeAudio, outputSettings: settings)
+        writerInput.expectsMediaDataInRealTime = true
+
+        let assetWriter = try AVAssetWriter(outputURL: url, fileType: AVFileTypeWAVE)
+        guard assetWriter.canAdd(writerInput) else {
+            throw "Can't add writer input to asset writer"
+        }
+        assetWriter.add(writerInput)
+        self.writerInput = writerInput
+    }
+
+    func setupCaptureSession() throws {
+        let audioCaptureDevice = AVCaptureDevice.defaultDevice(withMediaType: AVMediaTypeAudio)
+        let audioInput = try AVCaptureDeviceInput(device: audioCaptureDevice)
+
+        let captureSession = AVCaptureSession()
+
+        guard captureSession.canAddInput(audioInput) else {
+            throw "Can't add audio input to capture session"
+        }
+        captureSession.addInput(audioInput)
+
+        let dataOutput = AVCaptureAudioDataOutput()
+        dataOutput.setSampleBufferDelegate(self, queue: DispatchQueue.main)
+        
+        guard captureSession.canAddOutput(dataOutput) else {
+            throw "Can't add data output to capture session"
+        }
+        captureSession.addOutput(dataOutput)
+
+        self.dataOutput = dataOutput
+        self.captureSession = captureSession
+        captureSession.startRunning()
+        captureSession.stopRunning()
+    }
+
+}
+
+extension InterruptableAudioRecorder: AVCaptureAudioDataOutputSampleBufferDelegate {
+
+    func captureOutput(_ captureOutput: AVCaptureOutput!, didOutputSampleBuffer sampleBuffer: CMSampleBuffer!, from connection: AVCaptureConnection!) {
+
+    }
+
 }
 
 // MARK: - Recording methods
@@ -53,9 +110,9 @@ private extension InterruptableAudioRecorder {
         let tempFileExtension = "~\(tempFileURLs.count).temp"
         let tempURL = url.appendingPathExtension(tempFileExtension)
         tempFileURLs.append(tempURL)
-        let recorder = try AVAudioRecorder(url: tempURL, format: audioFormat)
-        recorder.record()
-        self.recorder = recorder
+//        let recorder = try AVAudioRecorder(url: tempURL, format: audioFormat)
+//        recorder.record()
+//        self.recorder = recorder
     }
 
     func pauseRecording() {
