@@ -69,7 +69,6 @@ final class InterruptableAudioRecorder: AudioRecorder {
     func pause(interruption: AudioEngineInterruption) {
         guard isRecording else { return }
         isRecording = false
-        print("InterruptableAudioRecorder.pause")
         pauseRecording()
         if interruption == .call {
             callDate = Date()
@@ -83,7 +82,6 @@ final class InterruptableAudioRecorder: AudioRecorder {
 private extension InterruptableAudioRecorder {
 
     func recordToTempFile() throws {
-        print("InterruptableAudioRecorder.recordToTempFile")
         let tempFileExtension = "~\(records.count).temp"
         let tempURL = url.appendingPathExtension(tempFileExtension)
         let fileRecord = RecordType.file(url: tempURL)
@@ -99,13 +97,11 @@ private extension InterruptableAudioRecorder {
     }
 
     func stopRecording() throws {
-        print("InterruptableAudioRecorder.stopRecording")
         pauseRecording()
         try finalizeRecordedTrack()
     }
 
     func finalizeRecordedTrack() throws {
-        print(#function)
         guard records.count > 0 else { return }
 
         if records.count == 1 {
@@ -120,14 +116,11 @@ private extension InterruptableAudioRecorder {
     }
 
     func renameToOriginalURL(url: URL) throws {
-        print(#function)
         let fileManager = FileManager.default
         try fileManager.moveItem(at: url, to: self.url)
     }
 
     func composeFiles() throws {
-        print(#function)
-
         var data: Data?
 
         for record in records {
