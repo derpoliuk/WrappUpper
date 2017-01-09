@@ -41,7 +41,6 @@ final class InterruptableAudioRecorder: AudioRecorder {
     fileprivate var records = [RecordType]()
 
     init(url: URL, format: AVAudioFormat) {
-        print("url: \(url)")
         self.url = url
         audioFormat = format
     }
@@ -128,27 +127,28 @@ private extension InterruptableAudioRecorder {
 
     func composeFiles() throws {
         print(#function)
-        let fileURLs = records.flatMap { $0.url }
-        guard fileURLs.count > 0 else { return }
-        let firstURL = fileURLs[0]
-        if fileURLs.count == 1 {
-            try renameToOriginalURL(url: firstURL)
-        } else {
-            let urls = fileURLs.dropFirst()
 
-            var data = try Data(contentsOf: firstURL)
+        var data: Data?
 
-            for url in urls {
-                let data2 = try Data(contentsOf: url)
-                data = WavDataConcatinator.concatWavData(data, withWavData: data2)
-            }
-
-            try data.write(to: self.url)
-
-            for url in fileURLs {
-                try FileManager.default.removeItem(at: url)
+        for record in records {
+            switch record {
+            case .silence(let duration):
+                guard let aData = data else { continue }
+                data = WavDataConcatinator.appendSilence(withDuration: duration, toWavData: aData)
+                break
+            case .file(let url):
+                let newData = try Data(contentsOf: url)
+                if let aData = data {
+                    data = WavDataConcatinator.concatWavData(aData, withWavData: newData)
+                } else {
+                    data = newData
+                }
+                break
             }
         }
+
+        guard let newData = data else { return }
+        try newData.write(to: url)
     }
 
 }
