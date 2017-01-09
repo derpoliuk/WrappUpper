@@ -17,6 +17,7 @@
 		1E3BAEBE1E22758E00589F4A /* InterruptableAudioEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E3BAEBD1E22758E00589F4A /* InterruptableAudioEngine.swift */; };
 		1E3BAEC01E2275AB00589F4A /* InterruptableAudioRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E3BAEBF1E2275AB00589F4A /* InterruptableAudioRecorder.swift */; };
 		1E3BAEC21E2275C500589F4A /* AudioEngineFileURLGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E3BAEC11E2275C500589F4A /* AudioEngineFileURLGenerator.swift */; };
+		1E7823191E2411E7005FB810 /* Sample.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E7823181E2411E7005FB810 /* Sample.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -44,6 +45,7 @@
 		1E3BAEBD1E22758E00589F4A /* InterruptableAudioEngine.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InterruptableAudioEngine.swift; sourceTree = "<group>"; };
 		1E3BAEBF1E2275AB00589F4A /* InterruptableAudioRecorder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InterruptableAudioRecorder.swift; sourceTree = "<group>"; };
 		1E3BAEC11E2275C500589F4A /* AudioEngineFileURLGenerator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AudioEngineFileURLGenerator.swift; sourceTree = "<group>"; };
+		1E7823181E2411E7005FB810 /* Sample.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Sample.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -91,6 +93,7 @@
 				1E3BAEBD1E22758E00589F4A /* InterruptableAudioEngine.swift */,
 				1E3BAEBF1E2275AB00589F4A /* InterruptableAudioRecorder.swift */,
 				1E3BAEC11E2275C500589F4A /* AudioEngineFileURLGenerator.swift */,
+				1E7823181E2411E7005FB810 /* Sample.m */,
 				1E3A35F01E22306B00F5C5C7 /* Main.storyboard */,
 				1E3A35F31E22306B00F5C5C7 /* Assets.xcassets */,
 				1E3A35F51E22306B00F5C5C7 /* LaunchScreen.storyboard */,
@@ -159,6 +162,7 @@
 					1E3A35E81E22306B00F5C5C7 = {
 						CreatedOnToolsVersion = 8.2.1;
 						DevelopmentTeam = 26Q6TZDWAV;
+						LastSwiftMigration = 0820;
 						ProvisioningStyle = Manual;
 					};
 					1E3A35FC1E22306B00F5C5C7 = {
@@ -218,6 +222,7 @@
 				1E3BAEBE1E22758E00589F4A /* InterruptableAudioEngine.swift in Sources */,
 				1E3A35ED1E22306B00F5C5C7 /* AppDelegate.swift in Sources */,
 				1E3BAEC01E2275AB00589F4A /* InterruptableAudioRecorder.swift in Sources */,
+				1E7823191E2411E7005FB810 /* Sample.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -354,6 +359,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				DEVELOPMENT_TEAM = 26Q6TZDWAV;
 				INFOPLIST_FILE = WrappUpper/Info.plist;
@@ -362,6 +368,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "89fbfac9-60cd-469e-97dc-8dfa37b0a342";
 				PROVISIONING_PROFILE_SPECIFIER = "iOS Wildcard Profile";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 3.0;
 			};
 			name = Debug;
@@ -370,6 +377,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				DEVELOPMENT_TEAM = 26Q6TZDWAV;
 				INFOPLIST_FILE = WrappUpper/Info.plist;
