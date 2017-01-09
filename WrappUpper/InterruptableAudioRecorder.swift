@@ -12,6 +12,22 @@ import AVFoundation
 enum RecordType {
     case file(url: URL)
     case silence(duration: TimeInterval)
+
+    var isFile: Bool {
+        if case .file(_) = self {
+            return true
+        } else {
+            return false
+        }
+    }
+
+    var url: URL? {
+        if case .file(let url) = self {
+            return url
+        } else {
+            return nil
+        }
+    }
 }
 
 final class InterruptableAudioRecorder: AudioRecorder {
@@ -101,6 +117,7 @@ private extension InterruptableAudioRecorder {
         } else {
             try composeFiles()
         }
+        records = []
     }
 
     func renameToOriginalURL(url: URL) throws {
@@ -111,7 +128,27 @@ private extension InterruptableAudioRecorder {
 
     func composeFiles() throws {
         print(#function)
-        print("records: \(records)")
+        let fileURLs = records.flatMap { $0.url }
+        guard fileURLs.count > 0 else { return }
+        let firstURL = fileURLs[0]
+        if fileURLs.count == 1 {
+            try renameToOriginalURL(url: firstURL)
+        } else {
+            let urls = fileURLs.dropFirst()
+
+            var data = try Data(contentsOf: firstURL)
+
+            for url in urls {
+                let data2 = try Data(contentsOf: url)
+                data = WavDataConcatinator.concatWavData(data, withWavData: data2)
+            }
+
+            try data.write(to: self.url)
+
+            for url in fileURLs {
+                try FileManager.default.removeItem(at: url)
+            }
+        }
     }
 
 }
