@@ -24,6 +24,12 @@ final class InterruptableAudioEngine: NSObject, AudioEngine {
         super.init()
         subsribeForNotifications()
         observerPhoneCalls()
+        do {
+            try AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayAndRecord)
+        } catch {
+            let message = "Error setting category for AVAudioSession. Reason: \(error.localizedDescription)"
+            fatalError(message)
+        }
     }
 
     deinit {
@@ -48,6 +54,13 @@ final class InterruptableAudioEngine: NSObject, AudioEngine {
 
     func record() {
         guard !isRecording else { return }
+
+        do {
+            try AVAudioSession.sharedInstance().setActive(true)
+        } catch {
+            let message = "Error setting AVAudioSession active. Reason: \(error.localizedDescription)"
+            fatalError(message)
+        }
 
         isRecording = true
 
@@ -102,8 +115,13 @@ private extension InterruptableAudioEngine {
     }
 
     func resumeRecording() {
-        guard let recorder = recorder else { return }
-        try! recorder.record()
+        guard let recorder = recorder, UIApplication.shared.applicationState == .active else { return }
+        do {
+            try recorder.record()
+        } catch {
+            let message = "Failed resume recording. Reason: \(error.localizedDescription)"
+            fatalError(message)
+        }
         delegate?.audioEngineDidResume(self)
     }
 
