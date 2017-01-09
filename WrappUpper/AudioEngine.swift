@@ -27,7 +27,7 @@ enum AudioEngineInterruption {
 }
 
 protocol AudioRecorder {
-    init(url: URL, format: AVAudioFormat)
+    init(url: URL)
     var url: URL { get }
     var isRecording: Bool { get }
     func record() throws

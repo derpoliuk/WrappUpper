@@ -55,7 +55,7 @@ final class InterruptableAudioEngine: NSObject, AudioEngine {
             recorder = e
         } else {
             let url = AudioEngineFileURLGenerator.generateAudioFileURL()
-            recorder = InterruptableAudioRecorder(url: url, format: audioFormat)
+            recorder = InterruptableAudioRecorder(url: url)
         }
 
         do {
@@ -79,10 +79,6 @@ final class InterruptableAudioEngine: NSObject, AudioEngine {
             fatalError(message)
         }
     }
-
-    private var audioFormat: AVAudioFormat {
-        return AVAudioFormat(commonFormat: .pcmFormatInt16, sampleRate: 16000, channels: 2, interleaved: true)
-    }
     
 }
 
@@ -90,7 +86,6 @@ final class InterruptableAudioEngine: NSObject, AudioEngine {
 
 private extension InterruptableAudioEngine {
 
-    //TODO: remove force try
     func pauseRecording(interruption: AudioEngineInterruption) {
         guard let recorder = recorder else { return }
         recorder.pause(interruption: interruption)
@@ -113,25 +108,6 @@ extension InterruptableAudioEngine: CXCallObserverDelegate {
         callObserver.setDelegate(self, queue: DispatchQueue.main)
     }
 
-    /*
-     applicationDidBecomeActive
-     call.isOutgoing: false
-     call.isOnHold: false
-     call.hasConnected: false
-     call.hasEnded: false
-     applicationWillResignActive
-     call.isOutgoing: false
-     call.isOnHold: false
-     call.hasConnected: true
-     call.hasEnded: false
-     aplicationDidEnterBackground
-     applicationWillEnterForeground
-     call.isOutgoing: false
-     call.isOnHold: false
-     call.hasConnected: true
-     call.hasEnded: true
-     applicationDidBecomeActive
-     */
     func callObserver(_ callObserver: CXCallObserver, callChanged call: CXCall) {
         if !call.hasEnded {
             pauseRecording(interruption: .call)

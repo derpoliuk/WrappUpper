@@ -18,12 +18,10 @@ final class InterruptableAudioRecorder: NSObject, AudioRecorder {
 
     fileprivate var recorder: AVAudioRecorder?
     fileprivate var tempFileURLs = [URL]()
-    fileprivate let audioFormat: AVAudioFormat
 
-    init(url: URL, format: AVAudioFormat) {
+    init(url: URL) {
         print("url: \(url)")
         self.url = url
-        audioFormat = format
     }
 
     func record() throws {
@@ -57,25 +55,6 @@ final class InterruptableAudioRecorder: NSObject, AudioRecorder {
     var assetWriter: AVAssetWriter!
 
     func setupWriterInput() throws {
-
-/*
-         AudioChannelLayout channelLayout;
-         memset(&channelLayout, 0, sizeof(AudioChannelLayout));
-         channelLayout.mChannelLayoutTag = kAudioChannelLayoutTag_Stereo;
-         NSDictionary *outputSettings = [NSDictionary dictionaryWithObjectsAndKeys:
-         [NSNumber numberWithInt:kAudioFormatLinearPCM], AVFormatIDKey,
-         [NSNumber numberWithFloat:44100.0], AVSampleRateKey,
-         [NSNumber numberWithInt:2], AVNumberOfChannelsKey,
-         [NSData dataWithBytes:&channelLayout length:sizeof(AudioChannelLayout)], AVChannelLayoutKey,
-         [NSNumber numberWithInt:16], AVLinearPCMBitDepthKey,
-         [NSNumber numberWithBool:NO], AVLinearPCMIsNonInterleaved,
-         [NSNumber numberWithBool:NO],AVLinearPCMIsFloatKey,
-         [NSNumber numberWithBool:NO], AVLinearPCMIsBigEndianKey,
-         nil];
-         AVAssetWriterInput *assetWriterInput = [AVAssetWriterInput assetWriterInputWithMediaType:AVMediaTypeAudio
-         outputSettings:outputSettings];
- */
-
         var channelLayout = AudioChannelLayout()
         let size = MemoryLayout<AudioChannelLayout>.size
         memset(&channelLayout, 0, size)
