@@ -30,8 +30,12 @@ final class InterruptableAudioEngine: NSObject, AudioEngine {
         NotificationCenter.default.removeObserver(self)
     }
 
+    var lastURL: URL?
+
     func playLast() {
-        guard let fileURL = recorder?.url, !isRecording else { return }
+        guard let fileURL = lastURL, !isRecording else {
+            return
+        }
         do {
             let player = try AVAudioPlayer(contentsOf: fileURL)
             player.play()
@@ -54,6 +58,7 @@ final class InterruptableAudioEngine: NSObject, AudioEngine {
         } else {
             let url = AudioEngineFileURLGenerator.generateAudioFileURL()
             recorder = InterruptableAudioRecorder(url: url, format: audioFormat)
+            lastURL = url
         }
 
         do {
