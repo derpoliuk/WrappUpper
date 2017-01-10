@@ -108,8 +108,22 @@
 }
 
 + (NSData *)appendSilenceWithDuration:(NSTimeInterval)duration toWavData:(NSData *)data {
-    NSLog(@"%s", __PRETTY_FUNCTION__);
-    return data;
+    long longSampleRate = 16000;
+    int channels = 2;
+    long byteRate = 16 * longSampleRate * channels / 8;
+
+    long musicLength = duration * byteRate;
+    long headerLength = 44; // header will be ignored anyway
+    long ength = musicLength + headerLength;
+
+    Byte *rawBytes = (Byte *)malloc(ength);
+    for (long i = 0; i < ength; i++) {
+        rawBytes[i] = 0;
+    }
+
+    NSData *silence = [NSData dataWithBytes:rawBytes length:ength];
+
+    return [self concatWavData:data withWavData:silence];
 }
 
 @end
