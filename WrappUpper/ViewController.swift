@@ -12,12 +12,18 @@ class ViewController: UIViewController {
 
     @IBOutlet fileprivate weak var recordButton: UIButton!
     @IBOutlet fileprivate weak var statusLabel: UILabel!
-    private let audioEngine = InterruptableAudioEngine()
+    fileprivate let audioEngine = InterruptableAudioEngine()
 
     override func viewDidLoad() {
         super.viewDidLoad()
         audioEngine.delegate = self
     }
+
+}
+
+// MARK: - Actions
+
+private extension ViewController {
 
     @IBAction func recordButtonPressed(_ sender: UIButton) {
         let title = !audioEngine.isRecording ? "Stop" : "Record"
@@ -37,7 +43,13 @@ class ViewController: UIViewController {
         audioEngine.playLast()
     }
 
-    private func startRecording() {
+}
+
+// MARK: - Record methods
+
+private extension ViewController {
+
+    func startRecording() {
         do {
             try audioEngine.record()
         } catch {
@@ -46,7 +58,7 @@ class ViewController: UIViewController {
         }
     }
 
-    private func stopRecording() {
+    func stopRecording() {
         do {
             try audioEngine.stop()
         } catch {
