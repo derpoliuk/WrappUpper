@@ -30,20 +30,26 @@ enum RecordType {
     }
 }
 
-final class InterruptableAudioRecorder: AudioRecorder {
+final class InterruptableAudioRecorder {
 
     let url: URL
     var isRecording = false
 
     fileprivate var recorder: AVAudioRecorder?
     fileprivate let audioFormat: AVAudioFormat
-
+    fileprivate var callDate: Date?
     fileprivate var records = [RecordType]()
 
     init(url: URL, format: AVAudioFormat) {
         self.url = url
         audioFormat = format
     }
+
+}
+
+// MARK: - AudioRecorder
+
+extension InterruptableAudioRecorder: AudioRecorder {
 
     func record() throws {
         guard !isRecording else { return }
@@ -63,8 +69,6 @@ final class InterruptableAudioRecorder: AudioRecorder {
         isRecording = false
         try stopRecording()
     }
-
-    fileprivate var callDate: Date?
 
     func pause(interruption: AudioEngineInterruption) {
         guard isRecording else { return }
@@ -92,7 +96,6 @@ private extension InterruptableAudioRecorder {
     }
 
     func pauseRecording() {
-        print("recorder!.currentTime: \(recorder!.currentTime)")
         recorder?.stop()
         recorder = nil
     }
@@ -123,24 +126,22 @@ private extension InterruptableAudioRecorder {
 
     func composeFiles() throws {
         var data: Data?
-
         for record in records {
             switch record {
             case .silence(let duration):
-                guard let aData = data else { continue }
-                data = WavDataConcatinator.appendSilence(withDuration: duration, toWavData: aData)
+                guard let oldData = data else { continue }
+                data = WavDataConcatinator.appendSilence(withDuration: duration, toWavData: oldData)
                 break
             case .file(let url):
                 let newData = try Data(contentsOf: url)
-                if let aData = data {
-                    data = WavDataConcatinator.concatWavData(aData, withWavData: newData)
+                if let oldData = data {
+                    data = WavDataConcatinator.concatWavData(oldData, withWavData: newData)
                 } else {
                     data = newData
                 }
                 break
             }
         }
-
         guard let newData = data else { return }
         try newData.write(to: url)
     }
