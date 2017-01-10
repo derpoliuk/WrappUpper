@@ -38,11 +38,21 @@ class ViewController: UIViewController {
     }
 
     private func startRecording() {
-        audioEngine.record()
+        do {
+            try audioEngine.record()
+        } catch {
+            let message = "Failed start recording. Reason: \(error.localizedDescription)"
+            fatalError(message)
+        }
     }
 
     private func stopRecording() {
-        audioEngine.stop()
+        do {
+            try audioEngine.stop()
+        } catch {
+            let message = "Failed stop recording. Reason: \(error.localizedDescription)"
+            fatalError(message)
+        }
     }
 
 }

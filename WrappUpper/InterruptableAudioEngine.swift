@@ -10,15 +10,16 @@ import UIKit
 import AVFoundation
 import CallKit
 
-final class InterruptableAudioEngine: NSObject, AudioEngine {
-
+final class InterruptableAudioEngine: NSObject {
+    // MARK: Internal properties
     weak var delegate: AudioEngineDelegate?
-
     var isRecording = false
-
+    // MARK: Private properties
     fileprivate var recorder: InterruptableAudioRecorder?
-    fileprivate var player: AVAudioPlayer?
     fileprivate var callObserver = CXCallObserver()
+    // MARK: Debug properties
+    fileprivate var lastURL: URL?
+    fileprivate var player: AVAudioPlayer?
 
     override init() {
         super.init()
@@ -36,34 +37,16 @@ final class InterruptableAudioEngine: NSObject, AudioEngine {
         NotificationCenter.default.removeObserver(self)
     }
 
-    var lastURL: URL?
+}
 
-    func playLast() {
-        guard let fileURL = lastURL, !isRecording else {
-            return
-        }
-        do {
-            let player = try AVAudioPlayer(contentsOf: fileURL)
-            player.play()
-            self.player = player
-        } catch {
-            let message = "Failed init AVAudioPlayer. Reason: \(error.localizedDescription)"
-            fatalError(message)
-        }
-    }
+// MARK: - AudioEngine
 
-    func record() {
+extension InterruptableAudioEngine: AudioEngine {
+
+    func record() throws {
         guard !isRecording else { return }
-
-        do {
-            try AVAudioSession.sharedInstance().setActive(true)
-        } catch {
-            let message = "Error setting AVAudioSession active. Reason: \(error.localizedDescription)"
-            fatalError(message)
-        }
-
         isRecording = true
-
+        try AVAudioSession.sharedInstance().setActive(true)
 
         let recorder: InterruptableAudioRecorder
         if let previousRecorder = self.recorder {
@@ -73,34 +56,21 @@ final class InterruptableAudioEngine: NSObject, AudioEngine {
             recorder = InterruptableAudioRecorder(url: url, format: audioFormat)
             lastURL = url
         }
-
-        do {
-            try recorder.record()
-        } catch {
-            let message = "Failed init start recorder. Reason: \(error.localizedDescription)"
-            fatalError(message)
-        }
+        try recorder.record()
         self.recorder = recorder
     }
 
-    func stop() {
+    func stop() throws {
         guard isRecording else { return }
-
         isRecording = false
-
-        do {
-            try recorder?.stop()
-        } catch {
-            let message = "Failed init stop recorder. Reason: \(error.localizedDescription)"
-            fatalError(message)
-        }
+        try recorder?.stop()
         recorder = nil
     }
 
     private var audioFormat: AVAudioFormat {
         return AVAudioFormat(commonFormat: .pcmFormatInt16, sampleRate: 16000, channels: 2, interleaved: true)
     }
-    
+
 }
 
 // MARK: - Recording methods
@@ -171,6 +141,26 @@ private extension InterruptableAudioEngine {
 
     @objc func applicationDidBecomeActive(_ notification: Notification) {
         resumeRecording()
+    }
+
+}
+
+// MARK: - Debugging
+
+extension InterruptableAudioEngine {
+
+    func playLast() {
+        guard let fileURL = lastURL, !isRecording else {
+            return
+        }
+        do {
+            let player = try AVAudioPlayer(contentsOf: fileURL)
+            player.play()
+            self.player = player
+        } catch {
+            let message = "Failed init AVAudioPlayer. Reason: \(error.localizedDescription)"
+            fatalError(message)
+        }
     }
 
 }
