@@ -92,6 +92,7 @@ private extension InterruptableAudioRecorder {
     }
 
     func pauseRecording() {
+        print("recorder!.currentTime: \(recorder!.currentTime)")
         recorder?.stop()
         recorder = nil
     }
