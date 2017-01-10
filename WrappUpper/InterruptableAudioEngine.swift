@@ -135,25 +135,6 @@ extension InterruptableAudioEngine: CXCallObserverDelegate {
         callObserver.setDelegate(self, queue: DispatchQueue.main)
     }
 
-    /*
-     applicationDidBecomeActive
-     call.isOutgoing: false
-     call.isOnHold: false
-     call.hasConnected: false
-     call.hasEnded: false
-     applicationWillResignActive
-     call.isOutgoing: false
-     call.isOnHold: false
-     call.hasConnected: true
-     call.hasEnded: false
-     aplicationDidEnterBackground
-     applicationWillEnterForeground
-     call.isOutgoing: false
-     call.isOnHold: false
-     call.hasConnected: true
-     call.hasEnded: true
-     applicationDidBecomeActive
-     */
     func callObserver(_ callObserver: CXCallObserver, callChanged call: CXCall) {
         if !call.hasEnded {
             pauseRecording(interruption: .call)
