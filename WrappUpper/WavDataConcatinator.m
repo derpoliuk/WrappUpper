@@ -13,7 +13,6 @@
 // Code is taken from http://stackoverflow.com/a/8677726/1226304
 
 + (NSData *)concatWavData:(NSData *)data1 withWavData:(NSData *)data2 {
-    NSLog(@"%s", __PRETTY_FUNCTION__);
     if ([data1 length] > 0 && [data2 length] > 0) {
 
         // TODO: Inject settings or use settings from header
@@ -24,22 +23,9 @@
         long byteRate = 16 * longSampleRate * channels / 8;
 
         NSUInteger wav1DataSize = [data1 length] - 44;
-        NSLog(@"WAV I:%lu",(unsigned long)wav1DataSize);
         NSUInteger wav2DataSize = [data2 length] - 44;
-        NSLog(@"WAV II:%lu",(unsigned long)wav2DataSize);
         NSData *wave1 = [NSMutableData dataWithData:[data1 subdataWithRange:NSMakeRange(44, wav1DataSize)]];
         NSData *wave2 = [NSMutableData dataWithData:[data2 subdataWithRange:NSMakeRange(44, wav2DataSize)]];
-
-        NSLog(@"WAV 1:%lu",(unsigned long)[wave1 length]);
-
-        NSLog(@"WAV 2:%lu",(unsigned long)[wave2 length]);
-
-
-//        NSUInteger headerLen = 44;
-//        NSData *headerData = [data1 subdataWithRange:NSMakeRange(0, headerLen)];
-//        Byte *byteData = (Byte *)malloc(headerLen);
-//        memcpy(byteData, [headerData bytes], headerLen);
-
 
         totalAudioLen = [wave1 length] + [wave2 length];
 
