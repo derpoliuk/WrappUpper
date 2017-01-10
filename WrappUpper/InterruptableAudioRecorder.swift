@@ -9,23 +9,6 @@
 import Foundation
 import AVFoundation
 
-private enum RecordType {
-    case file(url: URL)
-    case silence(duration: TimeInterval)
-
-    var isFile: Bool {
-        return url != nil
-    }
-
-    var url: URL? {
-        if case .file(let url) = self {
-            return url
-        } else {
-            return nil
-        }
-    }
-}
-
 final class InterruptableAudioRecorder {
 
     let url: URL
@@ -33,7 +16,9 @@ final class InterruptableAudioRecorder {
 
     fileprivate var recorder: AVAudioRecorder?
     fileprivate let audioFormat: AVAudioFormat
+    /// Stores beginning of phone call, that interrupted recording. Nil if no phone call had interrupted recording.
     fileprivate var callDate: Date?
+    /// Stores either URLs to recorded files or "silence" durations that later will be inserted between records.
     fileprivate var records = [RecordType]()
 
     init(url: URL, format: AVAudioFormat) {
@@ -121,25 +106,7 @@ private extension InterruptableAudioRecorder {
     }
 
     func composeFiles() throws {
-        var data: Data?
-        for record in records {
-            switch record {
-            case .silence(let duration):
-                guard let oldData = data else { continue }
-                data = WavDataConcatinator.appendSilence(withDuration: duration, toWavData: oldData)
-                break
-            case .file(let url):
-                let newData = try Data(contentsOf: url)
-                if let oldData = data {
-                    data = WavDataConcatinator.concatWavData(oldData, withWavData: newData)
-                } else {
-                    data = newData
-                }
-                break
-            }
-        }
-        guard let newData = data else { return }
-        try newData.write(to: url)
+        try RecordComposer.compose(records: records, toURL: url)
     }
 
 }

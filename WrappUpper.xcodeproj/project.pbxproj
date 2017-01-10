@@ -18,6 +18,7 @@
 		1E3BAEC01E2275AB00589F4A /* InterruptableAudioRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E3BAEBF1E2275AB00589F4A /* InterruptableAudioRecorder.swift */; };
 		1E3BAEC21E2275C500589F4A /* AudioEngineFileURLGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E3BAEC11E2275C500589F4A /* AudioEngineFileURLGenerator.swift */; };
 		1E78231D1E243AAA005FB810 /* WavDataConcatinator.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E78231C1E243AAA005FB810 /* WavDataConcatinator.m */; };
+		1E78231F1E24617D005FB810 /* RecordComposer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E78231E1E24617D005FB810 /* RecordComposer.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -48,6 +49,7 @@
 		1E78231A1E243AAA005FB810 /* WrappUpper-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "WrappUpper-Bridging-Header.h"; sourceTree = "<group>"; };
 		1E78231B1E243AAA005FB810 /* WavDataConcatinator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WavDataConcatinator.h; sourceTree = "<group>"; };
 		1E78231C1E243AAA005FB810 /* WavDataConcatinator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WavDataConcatinator.m; sourceTree = "<group>"; };
+		1E78231E1E24617D005FB810 /* RecordComposer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RecordComposer.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -94,6 +96,7 @@
 				1E3BAEBB1E2253B400589F4A /* AudioEngine.swift */,
 				1E3BAEBD1E22758E00589F4A /* InterruptableAudioEngine.swift */,
 				1E3BAEBF1E2275AB00589F4A /* InterruptableAudioRecorder.swift */,
+				1E78231E1E24617D005FB810 /* RecordComposer.swift */,
 				1E3BAEC11E2275C500589F4A /* AudioEngineFileURLGenerator.swift */,
 				1E78231B1E243AAA005FB810 /* WavDataConcatinator.h */,
 				1E78231C1E243AAA005FB810 /* WavDataConcatinator.m */,
@@ -226,6 +229,7 @@
 				1E3BAEC21E2275C500589F4A /* AudioEngineFileURLGenerator.swift in Sources */,
 				1E3BAEBE1E22758E00589F4A /* InterruptableAudioEngine.swift in Sources */,
 				1E3A35ED1E22306B00F5C5C7 /* AppDelegate.swift in Sources */,
+				1E78231F1E24617D005FB810 /* RecordComposer.swift in Sources */,
 				1E3BAEC01E2275AB00589F4A /* InterruptableAudioRecorder.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
