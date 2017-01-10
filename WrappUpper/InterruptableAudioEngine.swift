@@ -77,7 +77,6 @@ extension InterruptableAudioEngine: AudioEngine {
 
 private extension InterruptableAudioEngine {
 
-    //TODO: remove force try
     func pauseRecording(interruption: AudioEngineInterruption) {
         guard let recorder = recorder else { return }
         recorder.pause(interruption: interruption)
