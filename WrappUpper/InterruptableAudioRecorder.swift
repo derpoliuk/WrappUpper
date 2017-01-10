@@ -14,11 +14,7 @@ private enum RecordType {
     case silence(duration: TimeInterval)
 
     var isFile: Bool {
-        if case .file(_) = self {
-            return true
-        } else {
-            return false
-        }
+        return url != nil
     }
 
     var url: URL? {
