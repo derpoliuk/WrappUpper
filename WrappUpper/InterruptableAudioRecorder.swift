@@ -9,7 +9,7 @@
 import Foundation
 import AVFoundation
 
-enum RecordType {
+private enum RecordType {
     case file(url: URL)
     case silence(duration: TimeInterval)
 
