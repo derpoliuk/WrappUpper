@@ -18,8 +18,8 @@ protocol AudioEngineDelegate: class {
 protocol AudioEngine {
     weak var delegate: AudioEngineDelegate? { get set }
     var isRecording: Bool { get }
-    func record()
-    func stop()
+    func record() throws
+    func stop() throws
 }
 
 enum AudioEngineInterruption {

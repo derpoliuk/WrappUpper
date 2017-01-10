@@ -10,86 +10,73 @@ import UIKit
 import AVFoundation
 import CallKit
 
-final class InterruptableAudioEngine: NSObject, AudioEngine {
-
+final class InterruptableAudioEngine: NSObject {
+    // MARK: Internal properties
     weak var delegate: AudioEngineDelegate?
-
     var isRecording = false
-
+    // MARK: Private properties
     fileprivate var recorder: InterruptableAudioRecorder?
-    fileprivate var player: AVAudioPlayer?
     fileprivate var callObserver = CXCallObserver()
+    // MARK: Debug properties
+    fileprivate var lastURL: URL?
+    fileprivate var player: AVAudioPlayer?
 
     override init() {
         super.init()
         subsribeForNotifications()
         observerPhoneCalls()
+        do {
+            try AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayAndRecord)
+        } catch {
+            let message = "Error setting category for AVAudioSession. Reason: \(error.localizedDescription)"
+            fatalError(message)
+        }
     }
 
     deinit {
         NotificationCenter.default.removeObserver(self)
     }
 
-    func playLast() {
-        guard let fileURL = recorder?.url, !isRecording else { return }
-        do {
-            let player = try AVAudioPlayer(contentsOf: fileURL)
-            player.play()
-            self.player = player
-        } catch {
-            let message = "Failed init AVAudioPlayer. Reason: \(error.localizedDescription)"
-            fatalError(message)
-        }
-    }
+}
 
-    func record() {
+// MARK: - AudioEngine
+
+extension InterruptableAudioEngine: AudioEngine {
+
+    func record() throws {
         guard !isRecording else { return }
-
         isRecording = true
-
+        try AVAudioSession.sharedInstance().setActive(true)
 
         let recorder: InterruptableAudioRecorder
-        if let e = self.recorder {
-            recorder = e
+        if let previousRecorder = self.recorder {
+            recorder = previousRecorder
         } else {
             let url = AudioEngineFileURLGenerator.generateAudioFileURL()
             recorder = InterruptableAudioRecorder(url: url, format: audioFormat)
+            lastURL = url
         }
-
-        do {
-            try recorder.record()
-        } catch {
-            let message = "Failed init start recorder. Reason: \(error.localizedDescription)"
-            fatalError(message)
-        }
+        try recorder.record()
         self.recorder = recorder
     }
 
-    func stop() {
+    func stop() throws {
         guard isRecording else { return }
-
         isRecording = false
-
-        do {
-            try recorder?.stop()
-        } catch {
-            let message = "Failed init stop recorder. Reason: \(error.localizedDescription)"
-            fatalError(message)
-        }
+        try recorder?.stop()
         recorder = nil
     }
 
     private var audioFormat: AVAudioFormat {
         return AVAudioFormat(commonFormat: .pcmFormatInt16, sampleRate: 16000, channels: 2, interleaved: true)
     }
-    
+
 }
 
 // MARK: - Recording methods
 
 private extension InterruptableAudioEngine {
 
-    //TODO: remove force try
     func pauseRecording(interruption: AudioEngineInterruption) {
         guard let recorder = recorder else { return }
         recorder.pause(interruption: interruption)
@@ -97,8 +84,13 @@ private extension InterruptableAudioEngine {
     }
 
     func resumeRecording() {
-        guard let recorder = recorder else { return }
-        try! recorder.record()
+        guard let recorder = recorder, UIApplication.shared.applicationState == .active else { return }
+        do {
+            try recorder.record()
+        } catch {
+            let message = "Failed resume recording. Reason: \(error.localizedDescription)"
+            fatalError(message)
+        }
         delegate?.audioEngineDidResume(self)
     }
 
@@ -112,25 +104,6 @@ extension InterruptableAudioEngine: CXCallObserverDelegate {
         callObserver.setDelegate(self, queue: DispatchQueue.main)
     }
 
-    /*
-     applicationDidBecomeActive
-     call.isOutgoing: false
-     call.isOnHold: false
-     call.hasConnected: false
-     call.hasEnded: false
-     applicationWillResignActive
-     call.isOutgoing: false
-     call.isOnHold: false
-     call.hasConnected: true
-     call.hasEnded: false
-     aplicationDidEnterBackground
-     applicationWillEnterForeground
-     call.isOutgoing: false
-     call.isOnHold: false
-     call.hasConnected: true
-     call.hasEnded: true
-     applicationDidBecomeActive
-     */
     func callObserver(_ callObserver: CXCallObserver, callChanged call: CXCall) {
         if !call.hasEnded {
             pauseRecording(interruption: .call)
@@ -167,6 +140,26 @@ private extension InterruptableAudioEngine {
 
     @objc func applicationDidBecomeActive(_ notification: Notification) {
         resumeRecording()
+    }
+
+}
+
+// MARK: - Debugging
+
+extension InterruptableAudioEngine {
+
+    func playLast() {
+        guard let fileURL = lastURL, !isRecording else {
+            return
+        }
+        do {
+            let player = try AVAudioPlayer(contentsOf: fileURL)
+            player.play()
+            self.player = player
+        } catch {
+            let message = "Failed init AVAudioPlayer. Reason: \(error.localizedDescription)"
+            fatalError(message)
+        }
     }
 
 }

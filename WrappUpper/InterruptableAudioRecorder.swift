@@ -9,36 +9,54 @@
 import Foundation
 import AVFoundation
 
-final class InterruptableAudioRecorder: AudioRecorder {
+final class InterruptableAudioRecorder {
 
     let url: URL
-    var isRecording: Bool {
-        return recorder?.isRecording ?? false
-    }
+    var isRecording = false
 
     fileprivate var recorder: AVAudioRecorder?
-    fileprivate var tempFileURLs = [URL]()
     fileprivate let audioFormat: AVAudioFormat
+    /// Stores beginning of phone call, that interrupted recording. Nil if no phone call had interrupted recording.
+    fileprivate var callDate: Date?
+    /// Stores either URLs to recorded files or "silence" durations that later will be inserted between records.
+    fileprivate var records = [RecordType]()
 
     init(url: URL, format: AVAudioFormat) {
-        print("url: \(url)")
         self.url = url
         audioFormat = format
     }
 
+}
+
+// MARK: - AudioRecorder
+
+extension InterruptableAudioRecorder: AudioRecorder {
+
     func record() throws {
+        guard !isRecording else { return }
+        isRecording = true
+
+        if let date = callDate {
+            let callDuration = Date().timeIntervalSince(date)
+            let silenceRecord = RecordType.silence(duration: callDuration)
+            records.append(silenceRecord)
+            callDate = nil
+        }
         try recordToTempFile()
     }
 
     func stop() throws {
+        guard isRecording else { return }
+        isRecording = false
         try stopRecording()
     }
 
     func pause(interruption: AudioEngineInterruption) {
-        print("InterruptableAudioRecorder.pause")
+        guard isRecording else { return }
+        isRecording = false
         pauseRecording()
         if interruption == .call {
-
+            callDate = Date()
         }
     }
 
@@ -49,10 +67,10 @@ final class InterruptableAudioRecorder: AudioRecorder {
 private extension InterruptableAudioRecorder {
 
     func recordToTempFile() throws {
-        print("InterruptableAudioRecorder.recordToTempFile")
-        let tempFileExtension = "~\(tempFileURLs.count).temp"
+        let tempFileExtension = "~\(records.count).temp"
         let tempURL = url.appendingPathExtension(tempFileExtension)
-        tempFileURLs.append(tempURL)
+        let fileRecord = RecordType.file(url: tempURL)
+        records.append(fileRecord)
         let recorder = try AVAudioRecorder(url: tempURL, format: audioFormat)
         recorder.record()
         self.recorder = recorder
@@ -64,80 +82,31 @@ private extension InterruptableAudioRecorder {
     }
 
     func stopRecording() throws {
-        print("InterruptableAudioRecorder.stopRecording")
         pauseRecording()
         try finalizeRecordedTrack()
     }
 
     func finalizeRecordedTrack() throws {
-        print(#function)
-        guard tempFileURLs.count > 0 else { return }
+        guard records.count > 0 else { return }
 
-        if tempFileURLs.count == 1 {
-            try renameToOriginalURL(url: tempFileURLs[0])
+        if records.count == 1 {
+            let record = records[0]
+            if case .file(let url) = record {
+                try renameToOriginalURL(url: url)
+            }
         } else {
             try composeFiles()
         }
+        records = []
     }
 
     func renameToOriginalURL(url: URL) throws {
-        print(#function)
         let fileManager = FileManager.default
         try fileManager.moveItem(at: url, to: self.url)
     }
 
     func composeFiles() throws {
-        print(#function)
-        let assetsDispatchGroup = DispatchGroup()
-        var assets = [AVAsset]()
-        for url in tempFileURLs {
-            let asset = AVAsset(url: url)
-            assetsDispatchGroup.enter()
-            print("load tracks for asset")
-            asset.loadValuesAsynchronously(forKeys: ["tracks"]) {
-                print("finished loading tracks")
-                var error: NSError? = nil
-                let status = asset.statusOfValue(forKey: "tracks", error: &error)
-                assetsDispatchGroup.leave()
-            }
-            assets.append(asset)
-        }
-
-        assetsDispatchGroup.wait()
-
-        let mutableComposition = AVMutableComposition()
-        let mutableTrack = mutableComposition.addMutableTrack(withMediaType: AVMediaTypeAudio, preferredTrackID: kCMPersistentTrackID_Invalid)
-
-        var time = CMTime()
-        for asset in assets {
-            let timeRanges = asset.tracks.map { NSValue(timeRange:$0.timeRange) }
-            try mutableTrack.insertTimeRanges(timeRanges, of: asset.tracks, at: time)
-            time = CMTimeAdd(time, asset.duration)
-        }
-
-        guard let exportSession = AVAssetExportSession(asset: mutableComposition, presetName: AVAssetExportPresetAppleM4A) else {
-            // TODO: complete error
-            let error = NSError(domain: "1", code: 1, userInfo: nil)
-            throw error
-        }
-        exportSession.outputURL = url
-        exportSession.outputFileType = AVFileTypeAppleM4A
-        let dispatchGroup = DispatchGroup()
-        dispatchGroup.enter()
-        var success = false
-        exportSession.exportAsynchronously {
-            success = exportSession.error == nil
-            dispatchGroup.leave()
-        }
-        print("exportSession.error: \(exportSession.error)")
-        dispatchGroup.wait()
-
-        if !success {
-            // TODO: finish error
-            let error = NSError(domain: "", code: 1, userInfo: nil)
-            throw error
-        }
-
+        try RecordComposer.compose(records: records, toURL: url)
     }
 
 }

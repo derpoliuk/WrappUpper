@@ -12,12 +12,18 @@ class ViewController: UIViewController {
 
     @IBOutlet fileprivate weak var recordButton: UIButton!
     @IBOutlet fileprivate weak var statusLabel: UILabel!
-    private let audioEngine = InterruptableAudioEngine()
+    fileprivate let audioEngine = InterruptableAudioEngine()
 
     override func viewDidLoad() {
         super.viewDidLoad()
         audioEngine.delegate = self
     }
+
+}
+
+// MARK: - Actions
+
+private extension ViewController {
 
     @IBAction func recordButtonPressed(_ sender: UIButton) {
         let title = !audioEngine.isRecording ? "Stop" : "Record"
@@ -37,12 +43,28 @@ class ViewController: UIViewController {
         audioEngine.playLast()
     }
 
-    private func startRecording() {
-        audioEngine.record()
+}
+
+// MARK: - Record methods
+
+private extension ViewController {
+
+    func startRecording() {
+        do {
+            try audioEngine.record()
+        } catch {
+            let message = "Failed start recording. Reason: \(error.localizedDescription)"
+            fatalError(message)
+        }
     }
 
-    private func stopRecording() {
-        audioEngine.stop()
+    func stopRecording() {
+        do {
+            try audioEngine.stop()
+        } catch {
+            let message = "Failed stop recording. Reason: \(error.localizedDescription)"
+            fatalError(message)
+        }
     }
 
 }
